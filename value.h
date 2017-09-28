@@ -12,7 +12,8 @@ typedef enum
 {
 	UNKNOWN,
 	INTEGER,
-	FLOATINGPOINT
+	FLOATINGPOINT,
+	BOOLEAN,
 }valueType_t;
 
 //
@@ -24,6 +25,7 @@ struct value_t
 	{
 		double	fValue;
 		__int64 iValue;
+		bool	bValue;
 	};
 
 	valueType_t type;
@@ -37,7 +39,14 @@ struct value_t
 	double toDouble() const 
 	{ 
 		double ret=0.0f;
-		ret = (type == INTEGER )? static_cast<double>(iValue): fValue; 
+		
+		if (type == INTEGER )
+			ret = static_cast<double>(iValue);
+		else
+		if (type == BOOLEAN )
+			ret = static_cast<double>(bValue);
+		else
+			ret =  fValue; 
 		return ret;
 	}
 
@@ -49,10 +58,17 @@ struct value_t
 		__int64 ret=0L;
 #pragma warning (push)
 #pragma warning( disable:4244 ) // lost precision
-		ret = (type == INTEGER )?  iValue: static_cast<__int64>(fValue);
+		if (type == INTEGER )
+			ret = iValue;
+			else
+			if ( type == BOOLEAN )
+				ret = static_cast<__int64>(bValue);
+				else
+					ret = static_cast<__int64>(fValue);
 #pragma warning (pop)
 		return ret;
 	}
+
 
 	//
 	// set integer value
@@ -75,12 +91,26 @@ struct value_t
 	}
 
 	//
+	// set boolean value
+	//
+	value_t operator=( bool arg)
+	{
+		bValue = arg;
+		type = BOOLEAN;
+		return *this;
+	}
+
+	//
 	// checks equality with integer type
 	//
 	bool operator==( const __int64 arg )
 	{
 		if ( type == INTEGER )
 			return (arg == iValue);
+
+		if ( type == BOOLEAN )
+			return (arg == static_cast<__int64>(bValue));
+
 		return (arg == static_cast<__int64>(fValue));
 	}
 
@@ -91,7 +121,28 @@ struct value_t
 	{
 		if ( type == FLOATINGPOINT )
 			return (arg == fValue);
+
+		if ( type == BOOLEAN )
+			return (arg == static_cast<double>(bValue));
+
 		return (arg == static_cast<double>(iValue));
+	}
+
+	//
+	// checks equality with boolean type
+	//
+	bool operator==( const bool arg )
+	{
+		if ( type == BOOLEAN )
+			return (arg == bValue);
+
+#pragma warning (push)
+#pragma warning( disable:4800 ) // lost precision
+		if ( type == INTEGER )
+			return (arg == static_cast<bool>(iValue));
+
+		return (arg == static_cast<bool>(fValue));
+#pragma warning (pop)
 	}
 
 	//
@@ -101,6 +152,8 @@ struct value_t
 	{
 		if ( type == FLOATINGPOINT )
 			return fValue;
+		if ( type == BOOLEAN )
+			return static_cast<double>(bValue);
 		return static_cast<double>(iValue);
 	}
 
@@ -111,9 +164,28 @@ struct value_t
 	{
 		if ( type == INTEGER )
 			return iValue;
+		if ( type == BOOLEAN )
+			return static_cast<__int64>(bValue);
 		return static_cast<__int64>(fValue);
 	}
 
+
+	//
+	// cast to bool
+	//
+	operator bool()
+	{
+		if ( type == BOOLEAN )
+			return bValue;
+
+#pragma warning (push)
+#pragma warning( disable:4800 ) // lost precision
+		if ( type == INTEGER )
+			return static_cast<bool>(iValue);
+		
+		return static_cast<bool>(fValue);
+#pragma warning (pop)
+	}
 };
 
 

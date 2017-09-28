@@ -115,6 +115,10 @@ typedef struct
 * typedefs for common containers
 *
 *********************************************************************************************************/
+
+// TODO
+// move to c++11 syntax: using tokens_t = std::deque<token_t>; ...
+
 typedef std::deque<token_t>		tokens_t;
 typedef std::stack<value_t>		operands_t;
 typedef std::stack<operator_t>	operators_t;
