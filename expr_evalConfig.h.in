@@ -1,0 +1,3 @@
+// the configured options and settings for expr_eval
+#define expr_eval_VERSION_MAJOR @expr_eval_VERSION_MAJOR@
+#define expr_eval_VERSION_MINOR @expr_eval_VERSION_MINOR@
