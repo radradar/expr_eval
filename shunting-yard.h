@@ -39,6 +39,10 @@ exit.
 // TODO:
 // - move typedef enum to enum class ....
 
+namespace expressionEval
+{
+
+
 //enum class tokenType_t;
 //
 // types of tokens
@@ -118,5 +122,8 @@ typedef std::stack<std::string> functions_t;
 
 typedef std::string::iterator		istring_t;
 typedef std::string::const_iterator cistring_t;
+
+
+} //namespace expressionEval
 
 #endif

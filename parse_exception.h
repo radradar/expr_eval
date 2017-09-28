@@ -6,6 +6,10 @@
 
 #include "Status.h"
 
+
+namespace expressionEval
+{
+
 class parse_exception: public std::exception
 {
 public:
@@ -36,5 +40,6 @@ protected:
 	status_t	stat_;
 };
 
+} //namespace expressionEval
 
 #endif

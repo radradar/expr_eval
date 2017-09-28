@@ -18,6 +18,10 @@
 
 #include "expression_tokenizer.h"
 
+namespace expressionEval
+{
+
+
 ///
 /// lambdas wrapers (vs2012-> no resolution on overloaded functions when wrapping in std::function object )
 ///
@@ -190,5 +194,8 @@ public:
 	value_t evaluate( const std::string &expression, status_t &operationStatus );
 
 };
+
+
+} //namespace expressionEval
 
 #endif

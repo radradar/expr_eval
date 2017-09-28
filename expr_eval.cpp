@@ -81,20 +81,22 @@ int _tmain(/*int argc, _TCHAR* argv[]*/)
 		inputString = trim( inputString );
 		// to lower
 		std::transform( inputString.begin(), inputString.end(), inputString.begin(), std::tolower );
+		
 
-		Expression expression;
-		status_t operationStatus;
+
+		expressionEval::Expression expression;
+		expressionEval::status_t operationStatus;
 		auto answer = expression.evaluate( inputString, operationStatus );
 
 		// TODO: nie podoba mi sie rozbicie teog na wypisanie wartosci a obsluga bledu wewnatrz expression!!!!
-		if ( operationStatus.getFlag() == EOK )
+		if ( operationStatus.getFlag() == expressionEval::EOK )
 		{
-			if (answer.type == INTEGER )
+			if (answer.type == expressionEval::INTEGER )
 			{
 				std::cout << answer.iValue << std::endl;
 				//std::cout << "Answer *** " << answer.iValue << " *** " << std::endl;
 			}
-			else if(answer.type == FLOATINGPOINT)
+			else if(answer.type == expressionEval::FLOATINGPOINT)
 			{
 				std::cout << answer.fValue << std::endl;
 				//std::cout << "Answer *** " << answer.fValue << " *** " << std::endl;

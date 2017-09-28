@@ -13,6 +13,10 @@
 
 //#define _DEBUG_MSG_
 
+namespace expressionEval
+{
+
+
 class ExpressionTokenizer
 {
 private:
@@ -53,5 +57,8 @@ public:
 	//
 	std::string get_expression() const { return m_expression; }
 };
+
+} //namespace expressionEval
+
 
 #endif

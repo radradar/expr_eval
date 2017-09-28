@@ -1,5 +1,8 @@
 #include "value.h"
 
+namespace expressionEval
+{
+
 //
 // adds 2 values, depends on type of arguments
 //
@@ -117,3 +120,6 @@ bool operator==( const __int64 first, const value_t second )
 {
 	return (first == second.toInteger());
 }
+
+} //namespace expressionEval
+

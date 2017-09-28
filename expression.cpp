@@ -1,5 +1,8 @@
 #include "expression.h"
 
+namespace expressionEval
+{
+
 //
 // map of all available functions and theirs lambdas
 //
@@ -8,7 +11,7 @@ map_functions_t availableFunctions::m_mf;
 const availableFunctions Expression::m_availableFunction;
 
 // all operators
-/*const*/ operator_t Expression::OPERATORS[] = 
+/*const*/ operator_t expressionEval::Expression::OPERATORS[] = 
 {
 	{'^', 1, OPERATOR_BINARY, OPERATOR_RIGHT},
 	{'+', 2, OPERATOR_UNARY,  OPERATOR_RIGHT},// znak przd wartoscia
@@ -104,13 +107,13 @@ int Expression::push_number(const std::string &valueString,
 * @returns:
 *	EOK
 * @throws:
-*	evaluation_exception, std::exception
+*	evaluation_exception
 ***************************************************************************************/
 int Expression::apply_unary_operator(const operator_t *oper, 
 									 operands_t &operands) 
 {
 	if ( !operands.size() )
-		throw( std::exception("operand missing"));
+		throw( evaluation_exception("operand missing"));
 
 	value_t x = operands.top();
 	operands.pop();
@@ -125,11 +128,11 @@ int Expression::apply_unary_operator(const operator_t *oper,
 		else if ( x.type == FLOATINGPOINT )
 			x.fValue = - x.fValue;
 		else
-			throw( std::exception("operation on unknown value"));
+			throw( evaluation_exception("operation on unknown value"));
 		break;
 
 	default:
-		throw( std::exception("unrecognized unary operator"));
+		throw( evaluation_exception("unrecognized unary operator"));
 	}
 	operands.push(x);
 	return EOK;
@@ -142,19 +145,19 @@ int Expression::apply_unary_operator(const operator_t *oper,
 * @returns:
 *	EOK
 * @throws:
-*	evaluation_exception, std::exception
+*	evaluation_exception
 ***************************************************************************************/
 int Expression::apply_binary_operator(const operator_t *oper, 
 									  operands_t &operands) 
 {
 	if (!operands.size())
-		throw ( std::exception("1st operand's missing"));
+		throw ( evaluation_exception("1st operand's missing"));
 
 	value_t y = operands.top();
 	operands.pop();
 
 	if (!operands.size())
-		throw ( std::exception("2nd operand's missing"));
+		throw ( evaluation_exception("2nd operand's missing"));
 
 	value_t x = operands.top();
 	operands.pop();
@@ -189,7 +192,7 @@ int Expression::apply_binary_operator(const operator_t *oper,
 		}
 		break;
 	default:
-		throw( std::exception("unrecognized operator"));
+		throw( evaluation_exception("unrecognized operator"));
 	}
 
 	operands.push(x);
@@ -250,7 +253,7 @@ int Expression::apply_function(const std::string &function,
 	}
 	else
 	{
-		throw( std::exception("undefined function"));
+		throw( evaluation_exception("undefined function"));
 	}
 
 	operands.push(x);
@@ -264,14 +267,14 @@ int Expression::apply_function(const std::string &function,
 * @returns:
 *	EOK
 * @throws:
-*	evaluation_exception, std::exception
+*	evaluation_exception
 ***************************************************************************************/
 int Expression::push_operator(const operator_t *oper, 
 							  operands_t &operands,
 							  operators_t &operators) 
 {
 	if (!oper)
-		throw( std::exception("operator missing"));
+		throw( evaluation_exception("operator missing"));
 
 	int Status = 0;
 	while (operators.size() && Status == 0) 
@@ -307,7 +310,7 @@ void Expression::parse( tokens_t & tokens,
 {
 	if ( !tokens.size() )
 	{
-		throw std::exception("no tokens available");
+		throw evaluation_exception("no tokens available");
 	}
 
 	auto token = tokens.front();
@@ -375,7 +378,7 @@ void Expression::parse( tokens_t & tokens,
 			break;
 
 		default:
-			throw( std::exception("unknown token"));
+			throw( evaluation_exception("unknown token"));
 			break;
 
 		}
@@ -482,12 +485,12 @@ value_t Expression::evaluate( const std::string& expression, status_t &operation
 			std::cerr << "Evaluation error: " << e.what() << ", near position = " << get_last_eval_position() << std::endl;
 			//std::cout << std::string(operationStatus.getPosition(), ' ') << "^" << std::endl;
 		}
-		catch( const std::exception &e )
-		{
-			operationStatus.setFlag(EEVALUATION_FAILED_GENERAL);
-			std::cerr << "Evaluation error: " << e.what() << ", near position = " << get_last_eval_position() << std::endl;
-			//std::cout << std::string(get_last_eval_position(), ' ') << "^" << std::endl;			
-		}
+		//catch( const std::exception &e )
+		//{
+		//	operationStatus.setFlag(EEVALUATION_FAILED_GENERAL);
+		//	std::cerr << "Evaluation error: " << e.what() << ", near position = " << get_last_eval_position() << std::endl;
+		//	//std::cout << std::string(get_last_eval_position(), ' ') << "^" << std::endl;			
+		//}
 
 #ifdef _DEBUG_MSG_
 		std::cout << "stack tokens: " << m_tokens.size() << std::endl;
@@ -563,4 +566,5 @@ size_t Expression::updateOperatorPrecedence()
 	return success;
 }
 
+} //namespace expressionEval
 

@@ -6,6 +6,9 @@
 
 #include "Status.h"
 
+namespace expressionEval
+{
+
 class evaluation_exception: public std::exception
 {
 public:
@@ -36,5 +39,6 @@ protected:
 	double	value_;
 };
 
+} //namespace expressionEval
 
 #endif

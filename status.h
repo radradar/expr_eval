@@ -1,6 +1,10 @@
 #ifndef _STATUS_CLASS_H_
 #define _STATUS_CLASS_H_
 
+
+namespace expressionEval
+{
+
 // class enum?
 typedef enum
 {
@@ -50,5 +54,8 @@ public:
 };
 
 typedef Status status_t;
+
+} //namespace expressionEval
+
 
 #endif

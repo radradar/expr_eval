@@ -2,6 +2,8 @@
 #define _VALUE_OPAQUE_H_
 
 
+namespace expressionEval
+{
 
 //
 // type of data
@@ -123,4 +125,5 @@ value_t operator*(const value_t &first, const value_t &second);
 value_t operator/(const value_t &first, const value_t &second);
 
 
+} // namespace expressionEval
 #endif

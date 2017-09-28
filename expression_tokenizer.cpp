@@ -1,5 +1,8 @@
 #include "expression_tokenizer.h"
 
+namespace expressionEval
+{
+
 
 const token_t ExpressionTokenizer::SENTINEL = {TOKEN_UNKNOWN, ""};
 
@@ -189,4 +192,5 @@ std::string ExpressionTokenizer::get_function_name( istring_t it, istring_t end,
 	return valueString;
 }
 
+} //namespace expressionEval
 
