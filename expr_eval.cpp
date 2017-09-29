@@ -80,9 +80,8 @@ int _tmain(/*int argc, _TCHAR* argv[]*/)
 		// trim white chars
 		inputString = trim( inputString );
 		// to lower
-		std::transform( inputString.begin(), inputString.end(), inputString.begin(), std::tolower );
+		std::transform( inputString.begin(), inputString.end(), inputString.begin(), ::tolower );
 		
-
 
 		expressionEval::Expression expression;
 		expressionEval::status_t operationStatus;

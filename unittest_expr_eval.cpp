@@ -4,6 +4,7 @@
 #include <cmath>
 
 #include "../expr_eval/expression.h"
+#include "expression.h"
 #include "gtest/gtest.h"
  
 
@@ -18,8 +19,8 @@
 TEST (ExpressionEvaluateTestOperators, Sum )
 {
 	// INTEGERS
-	status_t operationStatus;
-	Expression expression;
+	expressionEval::status_t operationStatus;
+	expressionEval::Expression expression;
 	//TEST_CASE_EQ( 3+2);
 	//TEST_CASE_EQ( -3+2);
 	//TEST_CASE_EQ( -2+3);
@@ -41,8 +42,8 @@ TEST (ExpressionEvaluateTestOperators, Sum )
 
 TEST (ExpressionEvaluateTestOperators, Sub )
 {
-	status_t operationStatus;
-	Expression expression;
+	expressionEval::status_t operationStatus;
+	expressionEval::Expression expression;
 	TEST_CASE_EQ( 2-3 );
 	TEST_CASE_EQ( 3-2 );
 	TEST_CASE_EQ( -3-2 );
@@ -54,8 +55,8 @@ TEST (ExpressionEvaluateTestOperators, Sub )
 
 TEST (ExpressionEvaluateTestOperators, Mul )
 {
-	status_t operationStatus;
-	Expression expression;
+	expressionEval::status_t operationStatus;
+	expressionEval::Expression expression;
 	TEST_CASE_EQ( 2*3 );
 	TEST_CASE_EQ( 3*2 );
 	TEST_CASE_EQ( -3*2 );
@@ -65,8 +66,8 @@ TEST (ExpressionEvaluateTestOperators, Mul )
 
 TEST (ExpressionEvaluateTestOperators, Div )
 {
-	status_t operationStatus;
-	Expression expression;
+	expressionEval::status_t operationStatus;
+	expressionEval::Expression expression;
 	TEST_CASE_EQ( 2/3 );
 	TEST_CASE_EQ( 3/2 );
 	TEST_CASE_EQ( -3/2 );
@@ -76,8 +77,8 @@ TEST (ExpressionEvaluateTestOperators, Div )
 
 TEST (ExpressionEvaluateTestOperators, Modulo )
 {
-	status_t operationStatus;
-	Expression expression;
+	expressionEval::status_t operationStatus;
+	expressionEval::Expression expression;
 	TEST_CASE_EQ( 2%3 );
 	TEST_CASE_EQ( 3%2 );
 	TEST_CASE_EQ( 100%67 );
@@ -95,13 +96,13 @@ TEST (ExpressionEvaluateTestOperators, Modulo )
 
 TEST (ExpressionEvaluateTestOperators, Power )
 {
-	status_t operationStatus;
-	Expression expression;
+	expressionEval::status_t operationStatus;
+	expressionEval::Expression expression;
 
-	EXPECT_EQ( (__int64)pow(2,3), expression.evaluate("2^3", operationStatus) );
-	EXPECT_EQ( (__int64)pow(3,2), expression.evaluate("3^2", operationStatus) );
-	EXPECT_EQ( (__int64)pow(3,-2), expression.evaluate("3^(-2)", operationStatus) );
-	EXPECT_EQ( (__int64)pow(-3,2), expression.evaluate("(-3)^2", operationStatus) );
+	EXPECT_EQ( (int64_t)pow(2,3), expression.evaluate("2^3", operationStatus) );
+	EXPECT_EQ( (int64_t)pow(3,2), expression.evaluate("3^2", operationStatus) );
+	EXPECT_EQ( (int64_t)pow(3,-2), expression.evaluate("3^(-2)", operationStatus) );
+	EXPECT_EQ( (int64_t)pow(-3,2), expression.evaluate("(-3)^2", operationStatus) );
 
 	EXPECT_EQ( pow(2,3), expression.evaluate("2^3.0", operationStatus) );
 	EXPECT_EQ( pow(3,2), expression.evaluate("3^2.0", operationStatus) );
@@ -112,8 +113,8 @@ TEST (ExpressionEvaluateTestOperators, Power )
 
 TEST (ExpressionEvaluateTestOperators, OperatorPrecedence )
 {
-	status_t operationStatus;
-	Expression expression;
+	expressionEval::status_t operationStatus;
+	expressionEval::Expression expression;
 
 	TEST_CASE_DOUBLE_EQ(2+3*4);
 	TEST_CASE_DOUBLE_EQ((2+3)*4);
@@ -137,8 +138,8 @@ TEST (ExpressionEvaluateTestOperators, OperatorPrecedence )
 
 TEST (ExpressionEvaluateTestFunctions, Functions )
 {
-	status_t operationStatus;
-	Expression expression;
+	expressionEval::status_t operationStatus;
+	expressionEval::Expression expression;
 
 	TEST_CASE_DOUBLE_EQ( sin(0.0) );
 	TEST_CASE_DOUBLE_EQ( cos(0.0) );
@@ -147,6 +148,15 @@ TEST (ExpressionEvaluateTestFunctions, Functions )
 	TEST_CASE_DOUBLE_EQ( log(1.0) );
 	TEST_CASE_DOUBLE_EQ( log10(1.0) );
 	TEST_CASE_DOUBLE_EQ( log(1.0) );
+
+	TEST_CASE_DOUBLE_EQ( sin(0.5*180.0/3.1415) );
+	TEST_CASE_DOUBLE_EQ( cos(0.5*180.0/3.1415) );
+	TEST_CASE_DOUBLE_EQ( tan(0.5*180.0/3.1415) );
+	EXPECT_DOUBLE_EQ( 1./tan(0.5*180.0/3.1415), expression.evaluate("ctg(0.5*180.0/3.1415)", operationStatus) );
+	TEST_CASE_DOUBLE_EQ( log(100.0) );
+	TEST_CASE_DOUBLE_EQ( log10(100.0) );
+	TEST_CASE_DOUBLE_EQ( log(100.0) );
+
 
 	TEST_CASE_DOUBLE_EQ( floor(3.5) );
 	TEST_CASE_DOUBLE_EQ( floor(3.999999) );
@@ -160,10 +170,10 @@ TEST (ExpressionEvaluateTestFunctions, Functions )
 }
 
 
-TEST (ExpressionEvaluateTestFunctions, FunctionsOperators )
+TEST (ExpressionEvaluateTestFunctions, FunctionsAndOperators )
 {
-	status_t operationStatus;
-	Expression expression;
+	expressionEval::status_t operationStatus;
+	expressionEval::Expression expression;
 
 	TEST_CASE_DOUBLE_EQ( sin(1.0)*sin(0.0));
 	TEST_CASE_DOUBLE_EQ( cos(1.0)*cos(0.0));
@@ -175,12 +185,27 @@ TEST (ExpressionEvaluateTestFunctions, FunctionsOperators )
 
 }
 
+TEST (ExpressionEvaluateTestFunctions, FunctionsAndArgumentEvaluation )
+{
+	expressionEval::status_t operationStatus;
+	expressionEval::Expression expression;
+
+	TEST_CASE_DOUBLE_EQ( sin(1.0+2.0)*sin(0.0-1.0));
+	TEST_CASE_DOUBLE_EQ( cos(1.0+2.0)*cos(0.0-1.0));
+	TEST_CASE_DOUBLE_EQ( sin(1.0+2.0)*tan(0.0-1.0));
+	TEST_CASE_DOUBLE_EQ( floor(3.5+2.0)+ceil(0.10-1.0));
+	TEST_CASE_DOUBLE_EQ( sin(1.0+2.0)*sin(0.0-1.0));
+	TEST_CASE_DOUBLE_EQ( sin(1.0+2.0)*sin(0.0-1.0));
+	TEST_CASE_DOUBLE_EQ( sin(1.0+2.0)*sin(0.0-1.0));
+
+}
+
 #pragma endregion
 
 TEST (ExpressionEvaluateTestInvalidExpression, InvalidExpressions )
 {
-	status_t operationStatus;
-	Expression expression;
+	expressionEval::status_t operationStatus;
+	expressionEval::Expression expression;
 
 	//ASSERT_NO_THROW( expression.evaluate( "" ,operationStatus) );
 	//ASSERT_NO_THROW( expression.evaluate( "x" ,operationStatus) );

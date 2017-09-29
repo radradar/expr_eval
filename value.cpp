@@ -116,7 +116,7 @@ value_t operator/(const value_t &first, const value_t &second)
 //
 // compare value_t object with integer value
 //
-bool operator==( const __int64 first, const value_t second )
+bool operator==( const int64_t first, const value_t second )
 {
 	return (first == second.toInteger());
 }

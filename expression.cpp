@@ -1,5 +1,8 @@
 #include "expression.h"
 
+// TODO
+// - wrong position of error when misspelling function name
+
 namespace expressionEval
 {
 
@@ -76,7 +79,7 @@ int Expression::push_number(const std::string &valueString,
 {
 	size_t idx;
 	double fValue = 0.0f;
-	__int64 iValue = 0L;
+	int64_t iValue = 0L;
 	value_t value;
 
 	// TODO 

@@ -1,6 +1,7 @@
 #ifndef _VALUE_OPAQUE_H_
 #define _VALUE_OPAQUE_H_
 
+#include <stdint.h>
 
 namespace expressionEval
 {
@@ -24,7 +25,7 @@ struct value_t
 	union
 	{
 		double	fValue;
-		__int64 iValue;
+		int64_t iValue;
 		bool	bValue;
 	};
 
@@ -53,18 +54,18 @@ struct value_t
 	//
 	// cast to integer
 	//
-	__int64 toInteger() const 
+	int64_t toInteger() const 
 	{ 
-		__int64 ret=0L;
+		int64_t ret=0L;
 #pragma warning (push)
 #pragma warning( disable:4244 ) // lost precision
 		if (type == INTEGER )
 			ret = iValue;
 			else
 			if ( type == BOOLEAN )
-				ret = static_cast<__int64>(bValue);
+				ret = static_cast<int64_t>(bValue);
 				else
-					ret = static_cast<__int64>(fValue);
+					ret = static_cast<int64_t>(fValue);
 #pragma warning (pop)
 		return ret;
 	}
@@ -73,7 +74,7 @@ struct value_t
 	//
 	// set integer value
 	//
-	value_t operator=( __int64 arg)
+	value_t operator=( int64_t arg)
 	{
 		iValue = arg;
 		type = INTEGER;
@@ -103,15 +104,15 @@ struct value_t
 	//
 	// checks equality with integer type
 	//
-	bool operator==( const __int64 arg )
+	bool operator==( const int64_t arg )
 	{
 		if ( type == INTEGER )
 			return (arg == iValue);
 
 		if ( type == BOOLEAN )
-			return (arg == static_cast<__int64>(bValue));
+			return (arg == static_cast<int64_t>(bValue));
 
-		return (arg == static_cast<__int64>(fValue));
+		return (arg == static_cast<int64_t>(fValue));
 	}
 
 	//
@@ -160,13 +161,13 @@ struct value_t
 	//
 	// cast to int
 	//
-	operator __int64()
+	operator int64_t()
 	{
 		if ( type == INTEGER )
 			return iValue;
 		if ( type == BOOLEAN )
-			return static_cast<__int64>(bValue);
-		return static_cast<__int64>(fValue);
+			return static_cast<int64_t>(bValue);
+		return static_cast<int64_t>(fValue);
 	}
 
 
@@ -189,7 +190,7 @@ struct value_t
 };
 
 
-bool operator==( const __int64 first, const value_t second );
+bool operator==( const int64_t first, const value_t second );
 
 value_t operator+(const value_t &first, const value_t &second);
 value_t operator-(const value_t &first, const value_t &second);
