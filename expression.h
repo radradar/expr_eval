@@ -98,17 +98,17 @@ public:
 	*	pointer to a funtion or unknown function which does nothing
 	*
 	********************************************/
-	static std::function<double(double)> get( const std::string &fname, status_t &operationStatus )
+	static std::function<double(double)> get( const std::string &fname, Status &operationStatus )
 	{
-		operationStatus.setFlag(EPARSING_FAILED_GENERAL);
+		operationStatus.setFlag(ecode_t::EPARSING_FAILED_GENERAL);
 		auto found = m_mf.find( fname );
 		if ( found != m_mf.end() )
 		{
-			operationStatus.setFlag(EOK);
+			operationStatus.setFlag(ecode_t::EOK);
 			return found->second;
 		}else
 		{
-			operationStatus.setFlag(EFAIL);
+			operationStatus.setFlag(ecode_t::EFAIL);
 			return m_mf["unknown"];
 		}
 	}
@@ -135,8 +135,8 @@ private:
 	///
 	///
 	///
-	operatorType_t	get_arity(char oper, const token_t *previous);
-	const operator_t *get_operator(char oper, operatorType_t arity);
+	operatorType_t	get_arity(const char &oper, const token_t *previous);
+	const operator_t *get_operator(const char &oper, const operatorType_t &arity);
 
 	///
 	/// stack manipulators
@@ -155,12 +155,17 @@ private:
 	///
 	/// 
 	///
-	size_t updateOperatorPrecedence();
+	size_t update_operator_precedence();
+
+	///
+	///
+	///
+	void prepare_for_evaluation();
 
 	///
 	/// main parse function
 	///
-	void parse( tokens_t &tokens, operands_t &operands, operators_t &operators, functions_t &functions, status_t &operationStatus);
+	void parse( tokens_t &tokens, operands_t &operands, operators_t &operators, functions_t &functions, Status &operationStatus);
 
 	///
 	/// error findig helper
@@ -180,7 +185,7 @@ public:
 	///
 	/// default c-tor
 	///
-	Expression(): m_tokenizer("")
+	Expression(): m_tokenizer(""), m_lastParsedTokenPosition(0)
 	{}
 
 	///
@@ -191,7 +196,7 @@ public:
 	///
 	/// evaluates expression 
 	///
-	value_t evaluate( const std::string &expression, status_t &operationStatus );
+	value_t evaluate( const std::string &expression, Status &operationStatus );
 
 };
 

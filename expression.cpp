@@ -1,5 +1,6 @@
 #include "expression.h"
 
+
 // TODO
 // - wrong position of error when misspelling function name
 
@@ -16,17 +17,17 @@ const availableFunctions Expression::m_availableFunction;
 // all operators
 /*const*/ operator_t expressionEval::Expression::OPERATORS[] = 
 {
-	{'^', 1, OPERATOR_BINARY, OPERATOR_RIGHT},
-	{'+', 2, OPERATOR_UNARY,  OPERATOR_RIGHT},// znak przd wartoscia
-	{'-', 2, OPERATOR_UNARY,  OPERATOR_RIGHT}, // znak przed wartoscia
-	{'*', 3, OPERATOR_BINARY, OPERATOR_LEFT},
-	{'/', 3, OPERATOR_BINARY, OPERATOR_LEFT},
-	{'%', 3, OPERATOR_BINARY, OPERATOR_LEFT},
-	{'+', 4, OPERATOR_BINARY, OPERATOR_LEFT},
-	{'-', 4, OPERATOR_BINARY, OPERATOR_LEFT},
-	{'(', 5, OPERATOR_OTHER,  OPERATOR_NONE},
-	//{'[', 5, OPERATOR_OTHER,  OPERATOR_NONE},
-	//{'{', 5, OPERATOR_OTHER,  OPERATOR_NONE}
+	{'^', 1, operatorType_t::EOPERATOR_BINARY, operatorAssociativity_t::EOPERATOR_RIGHT},
+	{'+', 2, operatorType_t::EOPERATOR_UNARY,  operatorAssociativity_t::EOPERATOR_RIGHT},// znak przd wartoscia
+	{'-', 2, operatorType_t::EOPERATOR_UNARY,  operatorAssociativity_t::EOPERATOR_RIGHT}, // znak przed wartoscia
+	{'*', 3, operatorType_t::EOPERATOR_BINARY, operatorAssociativity_t::EOPERATOR_LEFT},
+	{'/', 3, operatorType_t::EOPERATOR_BINARY, operatorAssociativity_t::EOPERATOR_LEFT},
+	{'%', 3, operatorType_t::EOPERATOR_BINARY, operatorAssociativity_t::EOPERATOR_LEFT},
+	{'+', 4, operatorType_t::EOPERATOR_BINARY, operatorAssociativity_t::EOPERATOR_LEFT},
+	{'-', 4, operatorType_t::EOPERATOR_BINARY, operatorAssociativity_t::EOPERATOR_LEFT},
+	{'(', 5, operatorType_t::EOPERATOR_OTHER,  operatorAssociativity_t::EOPERATOR_NONE},
+	//{'[', 5, tokenType_t::operatorType_t::EOPERATOR_OTHER,  operatorAssociativity_t::EOPERATOR_NONE},
+	//{'{', 5, tokenType_t::operatorType_t::EOPERATOR_OTHER,  operatorAssociativity_t::EOPERATOR_NONE}
 };
 
 
@@ -37,14 +38,14 @@ const availableFunctions Expression::m_availableFunction;
 *	operator type (unary/binary) 
 *
 ***************************************************************************************/
-operatorType_t Expression::get_arity(char oper, 
+operatorType_t Expression::get_arity(const char &oper, 
 									 const token_t *previous) 
 {
-	if (previous->type == TOKEN_LEFT_BRACKET ||
-		previous->type == TOKEN_OPERATOR || 
-		previous->type == TOKEN_UNKNOWN )
-		return OPERATOR_UNARY;
-	return OPERATOR_BINARY;
+	if (previous->type == tokenType_t::ETOKEN_LEFT_BRACKET ||
+		previous->type == tokenType_t::ETOKEN_OPERATOR || 
+		previous->type == tokenType_t::ETOKEN_UNKNOWN ) // is it possible?
+		return operatorType_t::EOPERATOR_UNARY;
+	return operatorType_t::EOPERATOR_BINARY;
 }
 
 /**************************************************************************************
@@ -54,8 +55,8 @@ operatorType_t Expression::get_arity(char oper,
 *	pointer to operator definition
 *
 ***************************************************************************************/
-const operator_t *Expression::get_operator(char oper, 
-										   operatorType_t arity) 
+const operator_t *Expression::get_operator(const char &oper, 
+										   const operatorType_t &arity) 
 {
 	for (size_t i = 0; i < sizeof OPERATORS / sizeof OPERATORS[0]; ++i) 
 	{
@@ -70,7 +71,7 @@ const operator_t *Expression::get_operator(char oper,
 *
 * gets value as string, checks if represents an integer or a float, then pushes it on a stack of operands
 * @returns:
-*	EOK
+*	ecode_t::EOK
 * @throws:
 *	evaluation_exception
 ***************************************************************************************/
@@ -78,8 +79,8 @@ int Expression::push_number(const std::string &valueString,
 							operands_t &operands) 
 {
 	size_t idx;
-	double fValue = 0.0f;
-	int64_t iValue = 0L;
+	//double fValue = 0.0f;
+	//int64_t iValue = 0L;
 	value_t value;
 
 	// TODO 
@@ -89,26 +90,26 @@ int Expression::push_number(const std::string &valueString,
 	{ // floating point
 		value.fValue = stod( valueString, &idx );
 		if ( idx != valueString.length() )
-			throw( evaluation_exception("value conversion failure ", fValue ));
-		value.type = FLOATINGPOINT;
+			throw( evaluation_exception("value conversion -> integer failure " ));
+		value.type = valueType_t::FLOATINGPOINT;
 	}
 	else
 	{ // integer
 		value.iValue = stol( valueString, &idx );
 		if ( idx != valueString.length() )
-			throw( evaluation_exception("value conversion failure ", fValue ));
-		value.type = INTEGER;
+			throw( evaluation_exception("value conversion -> floating point failure " ));
+		value.type = valueType_t::INTEGER;
 	}
 
 	operands.push( value );
-	return EOK;
+	return static_cast<int>(ecode_t::EOK);
 }
 
 /**************************************************************************************
 *
 * applies unary opeartor to an operand
 * @returns:
-*	EOK
+*	ecode_t::EOK
 * @throws:
 *	evaluation_exception
 ***************************************************************************************/
@@ -126,10 +127,10 @@ int Expression::apply_unary_operator(const operator_t *oper,
 	case '+': // '+' sign in front of a number doesn't make a difference
 		break;
 	case '-':
-		if ( x.type == INTEGER )
+		if ( x.type == valueType_t::INTEGER )
 			x.iValue = -x.iValue;
-		else if ( x.type == FLOATINGPOINT )
-			x.fValue = - x.fValue;
+		else if ( x.type == valueType_t::FLOATINGPOINT )
+			x.fValue = -x.fValue;
 		else
 			throw( evaluation_exception("operation on unknown value"));
 		break;
@@ -138,7 +139,7 @@ int Expression::apply_unary_operator(const operator_t *oper,
 		throw( evaluation_exception("unrecognized unary operator"));
 	}
 	operands.push(x);
-	return EOK;
+	return static_cast<int>(ecode_t::EOK);
 }
 
 
@@ -146,7 +147,7 @@ int Expression::apply_unary_operator(const operator_t *oper,
 *
 * applies binary operator to an operand
 * @returns:
-*	EOK
+*	ecode_t::EOK
 * @throws:
 *	evaluation_exception
 ***************************************************************************************/
@@ -177,7 +178,19 @@ int Expression::apply_binary_operator(const operator_t *oper,
 		x = x * y;
 		break;
 	case '/':
+		{
+			if ( y.type == valueType_t::INTEGER )
+			{
+				if ( y.iValue == 0L )
+					throw( evaluation_exception("divide by 0 (integer)"));
+			}else
+				if ( y.type == valueType_t::FLOATINGPOINT )
+				{
+					if (y.fValue == 0.0f )
+						throw( evaluation_exception("divide by 0.0 (float)"));
+				}
 		x = x / y;
+		}
 		break;
 	case '%': // modulo
 		{
@@ -188,7 +201,7 @@ int Expression::apply_binary_operator(const operator_t *oper,
 		break;
 	case '^': // power
 		{ 
-			if ( x.type == INTEGER && y.type == INTEGER )
+			if ( x.type == valueType_t::INTEGER && y.type == valueType_t::INTEGER )
 				x = static_cast<double>(pow(x.toDouble(), y.toDouble()));
 			else
 				x = pow(x.toDouble(), y.toDouble());
@@ -199,7 +212,7 @@ int Expression::apply_binary_operator(const operator_t *oper,
 	}
 
 	operands.push(x);
-	return EOK;
+	return static_cast<int>(ecode_t::EOK);
 }
 
 
@@ -207,7 +220,7 @@ int Expression::apply_binary_operator(const operator_t *oper,
 *
 * detects kind of operator we are dealing with
 * @returns:
-*	EOK
+*	ecode_t::EOK
 * @throws:
 *	evaluation_exception
 ***************************************************************************************/
@@ -220,7 +233,7 @@ int Expression::apply_operator(const operator_t *oper,
 	if ( !operands.size())
 		throw( evaluation_exception("operands is missing!"));
 
-	if (oper->arity == OPERATOR_UNARY)
+	if (oper->arity == operatorType_t::EOPERATOR_UNARY)
 		return apply_unary_operator(oper, operands);
 	else
 		return apply_binary_operator(oper, operands);
@@ -231,7 +244,7 @@ int Expression::apply_operator(const operator_t *oper,
 *
 * calls specified in operand functions from a map op available functions
 * @returns:
-*	EOK
+*	ecode_t::EOK
 * @throws:
 *	evaluation_exception
 ***************************************************************************************/
@@ -244,12 +257,12 @@ int Expression::apply_function(const std::string &function,
 	value_t x = operands.top();
 	operands.pop();
 
-	status_t operationStatus;
+	Status operationStatus;
 	auto found_function = availableFunctions::get( function, operationStatus );
 
-	if ( operationStatus.getFlag() == EOK )
+	if ( operationStatus.getFlag() == ecode_t::EOK )
 	{
-		if ( x.type == INTEGER )
+		if ( x.type == valueType_t::INTEGER )
 			x = found_function(x.toDouble());
 		else
 			x = found_function(x.fValue);// REMARK!!! all functions returns and works with double!
@@ -260,7 +273,7 @@ int Expression::apply_function(const std::string &function,
 	}
 
 	operands.push(x);
-	return EOK;
+	return static_cast<int>(ecode_t::EOK);
 }
 
 
@@ -268,7 +281,7 @@ int Expression::apply_function(const std::string &function,
 *
 * adds an operator to a operators stack
 * @returns:
-*	EOK
+*	ecode_t::EOK
 * @throws:
 *	evaluation_exception
 ***************************************************************************************/
@@ -283,9 +296,9 @@ int Expression::push_operator(const operator_t *oper,
 	while (operators.size() && Status == 0) 
 	{
 		const operator_t &stack_operator = operators.top();
-		if (oper->arity == OPERATOR_UNARY ||
+		if (oper->arity == operatorType_t::EOPERATOR_UNARY ||
 			oper->precedence < stack_operator.precedence ||
-			(oper->associativity == OPERATOR_RIGHT &&
+			(oper->associativity == operatorAssociativity_t::EOPERATOR_RIGHT &&
 			oper->precedence == stack_operator.precedence))
 			break;
 
@@ -309,10 +322,11 @@ void Expression::parse( tokens_t & tokens,
 					   operands_t &operands, 
 					   operators_t &operators, 
 					   functions_t &functions, 
-					   status_t &operationStatus)
+					   Status &operationStatus)
 {
 	if ( !tokens.size() )
 	{
+		operationStatus.setFlag( ecode_t::EPARSING_FAILED_NO_TOKENS);
 		throw evaluation_exception("no tokens available");
 	}
 
@@ -320,18 +334,20 @@ void Expression::parse( tokens_t & tokens,
 
 	token_t previous = ExpressionTokenizer::SENTINEL;
 
-	while( token.type != TOKEN_UNKNOWN)
+	while( token.type != tokenType_t::ETOKEN_UNKNOWN)
 	{
 		m_lastParsedTokenPosition = token.position;
 
 		switch( token.type )
 		{
-		case TOKEN_NUMBER:				
-			if (previous.type == TOKEN_NUMBER ||
-				previous.type == TOKEN_FUNCTION ||
-				previous.type == TOKEN_RIGHT_BRACKET )
+		case tokenType_t::ETOKEN_NUMBER:				
+			if (previous.type == tokenType_t::ETOKEN_NUMBER ||
+				previous.type == tokenType_t::ETOKEN_FUNCTION ||
+				previous.type == tokenType_t::ETOKEN_RIGHT_BRACKET )
 			{
-				throw( parse_exception("syntax error - no operator?", status_t(EPARSING_FAILED_GENERAL)));
+				operationStatus.setFlag(ecode_t::EPARSING_FAILED_GENERAL);
+				operationStatus.setPosition(token.position);
+				throw( parse_exception("syntax error - no operator?"));
 			}
 			else 
 			{
@@ -339,11 +355,11 @@ void Expression::parse( tokens_t & tokens,
 			}
 			break;
 
-		case TOKEN_LEFT_BRACKET:	
-			operators.push(*get_operator('(', OPERATOR_OTHER) );
+		case tokenType_t::ETOKEN_LEFT_BRACKET:	
+			operators.push(*get_operator('(', operatorType_t::EOPERATOR_OTHER) );
 			break;
 
-		case TOKEN_RIGHT_BRACKET:	
+		case tokenType_t::ETOKEN_RIGHT_BRACKET:	
 			{
 				bool found_parenthesis = false;
 				while (operators.size() && !found_parenthesis) 
@@ -358,7 +374,11 @@ void Expression::parse( tokens_t & tokens,
 				}
 
 				if (!found_parenthesis)
-					throw( parse_exception("No corresponding parenthesis", status_t(EPARSING_FAILED_GENERAL, token.position)));
+				{
+					operationStatus.setFlag(ecode_t::EPARSING_FAILED_NO_CLOSING_PARENTHESIS);
+					operationStatus.setPosition(token.position);
+					throw( parse_exception("No closing parenthesis"));
+				}
 				else 
 					if (functions.size())
 					{
@@ -368,7 +388,7 @@ void Expression::parse( tokens_t & tokens,
 			}
 			break;
 
-		case TOKEN_OPERATOR:
+		case tokenType_t::ETOKEN_OPERATOR:
 			push_operator(
 				get_operator(token.value[0],
 				get_arity(token.value[0], &previous)),
@@ -376,47 +396,58 @@ void Expression::parse( tokens_t & tokens,
 				operators);
 			break;
 
-		case TOKEN_FUNCTION:
+		case tokenType_t::ETOKEN_FUNCTION:
 			functions.push(token.value);
 			break;
 
 		default:
-			throw( evaluation_exception("unknown token"));
+			operationStatus.setFlag(ecode_t::EPARSING_FAILED_NO_CLOSING_PARENTHESIS);
+			operationStatus.setPosition(token.position);
+			throw( parse_exception("Unknown token"));
 			break;
 
 		}
 
 		previous = token;
+
+		// remove top token
 		tokens.pop_front();
+
+		// get next token
 		token = tokens.front();
 	}
 
 
 	// Apply all remaining operators.
-	while (operators.size() && operationStatus.getFlag() == EOK) 
+	while (operators.size() && operationStatus.getFlag() == ecode_t::EOK) 
 	{
-		const operator_t &oper = operators.top();
+		const operator_t oper = operators.top();
 		operators.pop();
 		if (oper.oper == '(')
-			//operationStatus.setFlag( EFAIL );
-			throw( parse_exception("No corresponding parenthesis", status_t(EPARSING_FAILED_NO_CLOSING_PARENTHESIS, token.position )));
-
+		{
+			operationStatus.setFlag( ecode_t::EFAIL );
+			operationStatus.setPosition( token.position );
+			throw( parse_exception("No closing parenthesis"));
+		}
 		else
+		{
 			apply_operator(&oper, operands);
+		}
 	}
 }
 
 
 /**************************************************************************************
 *
-* main function, clears stacks, inserts expression and goes through parsed tokens computing operands values
+* clears all containers etc
 * @returns:
-*	value_t with calculated value and status
+*	void
 * @throws:
-*	evaluation_exception
+*	no throw
 ***************************************************************************************/
-value_t Expression::evaluate( const std::string& expression, status_t &operationStatus )
+void Expression::prepare_for_evaluation()
 {
+
 	// clear all necessary containers
 	m_tokens.clear();
 
@@ -429,16 +460,31 @@ value_t Expression::evaluate( const std::string& expression, status_t &operation
 	while( m_functions.size() )
 		m_functions.pop();
 
+}
+
+/**************************************************************************************
+*
+* main function, clears stacks, inserts expression and goes through parsed tokens computing operands values
+* @returns:
+*	value_t with calculated value and status
+* @throws:
+*	evaluation_exception
+***************************************************************************************/
+value_t Expression::evaluate( const std::string& expression, Status &operationStatus )
+{
+	value_t answer;
+
+	prepare_for_evaluation();
+
 	// get tokens
 	m_tokens = m_tokenizer.get_tokens( expression, operationStatus );
 
-	value_t answer;
 
-	if ( operationStatus.getFlag() == EOK )
+	if ( operationStatus.getFlag() == ecode_t::EOK )
 	{
 		if ( m_tokens.size() <= 1 )
 		{ // tokens missing
-			operationStatus.setFlag( EPARSING_FAILED_GENERAL );
+			operationStatus.setFlag( ecode_t::EPARSING_FAILED_GENERAL );
 			return answer;
 		}
 
@@ -450,41 +496,50 @@ value_t Expression::evaluate( const std::string& expression, status_t &operation
 			// TODO 
 			// - update answer to nan?
 			// check if all elements are consumed except one operand which is real answer
-			if ( (m_operands.size() == 1) && ( m_tokens.size() == 1/*unknown left*/ && !m_operators.size() && !m_functions.size() ) )
-			{
+			if ( operationStatus.getFlag() == ecode_t::EOK && m_operands.size() == 1 &&  m_tokens.size() == 1/*unknown left*/ && !m_operators.size() && !m_functions.size() )
+			{ // evaluation seems to be ok, so answer is on top of operands stack
 				answer = m_operands.top();
 			}
 			else
-			{
-				//operationStatus.setFlag( EFAIL );
+			{ // evaluation failure
+				auto operationFlag = operationStatus.getFlag();
+				if ( operationFlag != ecode_t::EOK )
+				{
+					/*switch( operationFlag() )
+					{
+						case
+					}*/
+					
+				}
+				else
 				if ( m_operands.size() != 1 )
 				{
-					operationStatus.setFlag( EEVALUATION_FAILED_OPERANDS_NOT_CONSUMED );
+					operationStatus.setFlag( ecode_t::EEVALUATION_FAILED_OPERANDS_NOT_CONSUMED );
 					std::cerr << "Parsing error: " << " operand(s) left on stack" << std::endl;
 				}
 				else
 					if ( m_tokens.size() != 1 ) /*unknown left*/
 					{
-						operationStatus.setFlag( EEVALUATION_FAILED_TOKENS_NOT_CONSUMED );
+						operationStatus.setFlag( ecode_t::EEVALUATION_FAILED_TOKENS_NOT_CONSUMED );
 						std::cerr << "Parsing error: " << " token(s) left on stack" << std::endl;
 					}
 					else
 						if ( m_operators.size() )
 						{
-							operationStatus.setFlag( EEVALUATION_FAILED_OPERATORS_NOT_CONSUMED );
+							operationStatus.setFlag( ecode_t::EEVALUATION_FAILED_OPERATORS_NOT_CONSUMED );
 							std::cerr << "Parsing error: " << " operator(s) left on stack" << std::endl;
 						}
 						else
 							if ( m_functions.size() )
 							{
-								operationStatus.setFlag( EEVALUATION_FAILED_FUNCTION_NOT_CONSUMED );
+								operationStatus.setFlag( ecode_t::EEVALUATION_FAILED_FUNCTION_NOT_CONSUMED );
 								std::cerr << "Parsing error: " << " function(s) left on stack" << std::endl;
 							}
 			}	
 		}
 		catch( const evaluation_exception &e)
 		{
-			operationStatus.setFlag(EEVALUATION_FAILED_GENERAL);
+			operationStatus.setFlag(ecode_t::EEVALUATION_FAILED_GENERAL);
 			std::cerr << "Evaluation error: " << e.what() << ", near position = " << get_last_eval_position() << std::endl;
 			//std::cout << std::string(operationStatus.getPosition(), ' ') << "^" << std::endl;
 		}
@@ -503,8 +558,8 @@ value_t Expression::evaluate( const std::string& expression, status_t &operation
 #endif
 	}
 	else
-	{
-		std::cerr << "Tokenize error: " << ", near position = " << get_last_eval_position() << std::endl;
+	{ // failure at get_tokens()=> parsing error
+		std::cerr << "Parsing error: " <<  operationStatus.toString() << " near position = " << operationStatus.getPosition() << std::endl;
 		//std::cout << std::string(operationStatus.getPosition(), ' ') << "^" << std::endl;
 	}
 
@@ -520,7 +575,7 @@ value_t Expression::evaluate( const std::string& expression, status_t &operation
 * @throws:
 *	NONE
 ***************************************************************************************/
-size_t Expression::updateOperatorPrecedence()
+size_t Expression::update_operator_precedence()
 {
 	std::ifstream ifs("precedence.cfg");
 	size_t success=0;

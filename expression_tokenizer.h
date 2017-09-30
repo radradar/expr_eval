@@ -5,6 +5,7 @@
 #include <cctype>
 #include <set>
 #include <iostream>
+#include <algorithm>
 
 #include "shunting-yard.h"
 
@@ -31,8 +32,14 @@ private:
 	ExpressionTokenizer(const ExpressionTokenizer &);
 	ExpressionTokenizer operator=(const ExpressionTokenizer &);
 
-	std::string get_number( istring_t it, istring_t end, status_t &operationStatus);
-	std::string get_function_name( istring_t it, istring_t end, status_t &operationStatus);
+	std::string get_number( istring_t it, istring_t end, Status &operationStatus);
+	std::string get_function_name( istring_t it, istring_t end, Status &operationStatus);
+
+	///
+	/// prepares & basic check expression for validity
+	///
+	std::string prepare_expression( const std::string& expression, Status &operationStatus );
+
 
 protected:
 	// NONE
@@ -50,7 +57,7 @@ public:
 	//
 	// make tokens fron an expression
 	//
-	tokens_t get_tokens( const std::string &expression, status_t &operationStatus );
+	tokens_t get_tokens( const std::string &expression, Status &operationStatus );
 
 	//
 	// getters

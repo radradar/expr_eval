@@ -3,19 +3,25 @@
 
 #include <stdint.h>
 
+//#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5 ) || _MSC_VER >= 1700 
+//#define ENUM(arg) enum class arg
+//#else
+//#define ENUM(arg) typedef enum arg
+//#endif
+
 namespace expressionEval
 {
 
 //
 // type of data
 //
-typedef enum
+enum class valueType_t
 {
 	UNKNOWN,
 	INTEGER,
 	FLOATINGPOINT,
 	BOOLEAN,
-}valueType_t;
+};
 
 //
 // holds int or float value and type of holding value 
@@ -31,7 +37,7 @@ struct value_t
 
 	valueType_t type;
 
-	value_t():iValue(0L), type(UNKNOWN)
+	value_t():iValue(0L), type(valueType_t::UNKNOWN)
 	{}
 
 	//
@@ -41,10 +47,10 @@ struct value_t
 	{ 
 		double ret=0.0f;
 		
-		if (type == INTEGER )
+		if (type == valueType_t::INTEGER )
 			ret = static_cast<double>(iValue);
 		else
-		if (type == BOOLEAN )
+		if (type == valueType_t::BOOLEAN )
 			ret = static_cast<double>(bValue);
 		else
 			ret =  fValue; 
@@ -59,10 +65,10 @@ struct value_t
 		int64_t ret=0L;
 #pragma warning (push)
 #pragma warning( disable:4244 ) // lost precision
-		if (type == INTEGER )
+		if (type == valueType_t::INTEGER )
 			ret = iValue;
 			else
-			if ( type == BOOLEAN )
+			if ( type == valueType_t::BOOLEAN )
 				ret = static_cast<int64_t>(bValue);
 				else
 					ret = static_cast<int64_t>(fValue);
@@ -77,7 +83,7 @@ struct value_t
 	value_t operator=( int64_t arg)
 	{
 		iValue = arg;
-		type = INTEGER;
+		type = valueType_t::INTEGER;
 		return *this;
 	}
 
@@ -87,7 +93,7 @@ struct value_t
 	value_t operator=( double arg)
 	{
 		fValue = arg;
-		type = FLOATINGPOINT;
+		type = valueType_t::FLOATINGPOINT;
 		return *this;
 	}
 
@@ -97,7 +103,7 @@ struct value_t
 	value_t operator=( bool arg)
 	{
 		bValue = arg;
-		type = BOOLEAN;
+		type = valueType_t::BOOLEAN;
 		return *this;
 	}
 
@@ -106,10 +112,10 @@ struct value_t
 	//
 	bool operator==( const int64_t arg )
 	{
-		if ( type == INTEGER )
+		if ( type == valueType_t::INTEGER )
 			return (arg == iValue);
 
-		if ( type == BOOLEAN )
+		if ( type == valueType_t::BOOLEAN )
 			return (arg == static_cast<int64_t>(bValue));
 
 		return (arg == static_cast<int64_t>(fValue));
@@ -120,10 +126,10 @@ struct value_t
 	//
 	bool operator==( const double arg )
 	{
-		if ( type == FLOATINGPOINT )
+		if ( type == valueType_t::FLOATINGPOINT )
 			return (arg == fValue);
 
-		if ( type == BOOLEAN )
+		if ( type == valueType_t::BOOLEAN )
 			return (arg == static_cast<double>(bValue));
 
 		return (arg == static_cast<double>(iValue));
@@ -134,12 +140,12 @@ struct value_t
 	//
 	bool operator==( const bool arg )
 	{
-		if ( type == BOOLEAN )
+		if ( type == valueType_t::BOOLEAN )
 			return (arg == bValue);
 
 #pragma warning (push)
 #pragma warning( disable:4800 ) // lost precision
-		if ( type == INTEGER )
+		if ( type == valueType_t::INTEGER )
 			return (arg == static_cast<bool>(iValue));
 
 		return (arg == static_cast<bool>(fValue));
@@ -151,9 +157,9 @@ struct value_t
 	//
 	operator double()
 	{
-		if ( type == FLOATINGPOINT )
+		if ( type == valueType_t::FLOATINGPOINT )
 			return fValue;
-		if ( type == BOOLEAN )
+		if ( type == valueType_t::BOOLEAN )
 			return static_cast<double>(bValue);
 		return static_cast<double>(iValue);
 	}
@@ -163,9 +169,9 @@ struct value_t
 	//
 	operator int64_t()
 	{
-		if ( type == INTEGER )
+		if ( type == valueType_t::INTEGER )
 			return iValue;
-		if ( type == BOOLEAN )
+		if ( type == valueType_t::BOOLEAN )
 			return static_cast<int64_t>(bValue);
 		return static_cast<int64_t>(fValue);
 	}
@@ -176,12 +182,12 @@ struct value_t
 	//
 	operator bool()
 	{
-		if ( type == BOOLEAN )
+		if ( type == valueType_t::BOOLEAN )
 			return bValue;
 
 #pragma warning (push)
 #pragma warning( disable:4800 ) // lost precision
-		if ( type == INTEGER )
+		if ( type == valueType_t::INTEGER )
 			return static_cast<bool>(iValue);
 		
 		return static_cast<bool>(fValue);

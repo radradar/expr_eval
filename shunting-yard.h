@@ -37,7 +37,6 @@ exit.
 */
 
 // TODO:
-// - move typedef enum to enum class ....
 
 namespace expressionEval
 {
@@ -47,15 +46,15 @@ namespace expressionEval
 //
 // types of tokens
 //
-typedef enum 
+enum class tokenType_t
 {
-	TOKEN_UNKNOWN,
-	TOKEN_NUMBER,
-	TOKEN_LEFT_BRACKET,
-	TOKEN_RIGHT_BRACKET,
-	TOKEN_OPERATOR,
-	TOKEN_FUNCTION
-} tokenType_t;
+	ETOKEN_UNKNOWN,
+	ETOKEN_NUMBER,
+	ETOKEN_LEFT_BRACKET,
+	ETOKEN_RIGHT_BRACKET,
+	ETOKEN_OPERATOR,
+	ETOKEN_FUNCTION
+};
 
 //
 // definition of a token
@@ -70,22 +69,22 @@ typedef struct
 //
 // operator arity
 //
-typedef enum 
+enum class operatorType_t
 {
-	OPERATOR_UNARY,
-	OPERATOR_BINARY,
-	OPERATOR_OTHER
-} operatorType_t;
+	EOPERATOR_UNARY,
+	EOPERATOR_BINARY,
+	EOPERATOR_OTHER
+} ;
 
 //
 // operator assoc.
 //
-typedef enum 
+enum class operatorAssociativity_t
 {
-	OPERATOR_NONE,
-	OPERATOR_LEFT,
-	OPERATOR_RIGHT
-} operatorAssociativity_t;
+	EOPERATOR_NONE,
+	EOPERATOR_LEFT,
+	EOPERATOR_RIGHT
+} ;
 
 
 //
@@ -119,10 +118,10 @@ typedef struct
 // TODO
 // move to c++11 syntax: using tokens_t = std::deque<token_t>; ...
 
-typedef std::deque<token_t>		tokens_t;
-typedef std::stack<value_t>		operands_t;
-typedef std::stack<operator_t>	operators_t;
-typedef std::stack<std::string> functions_t;
+typedef std::deque<token_t>			tokens_t;
+typedef std::stack<value_t>			operands_t;
+typedef std::stack<operator_t>		operators_t;
+typedef std::stack<std::string>		functions_t;
 
 typedef std::string::iterator		istring_t;
 typedef std::string::const_iterator cistring_t;

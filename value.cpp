@@ -9,20 +9,20 @@ namespace expressionEval
 value_t operator+(const value_t &first, const value_t &second)
 {
 	// TODO: how to add unknown types?
-	if ( first.type == UNKNOWN || second.type == UNKNOWN )
+	if ( first.type == valueType_t::UNKNOWN || second.type == valueType_t::UNKNOWN )
 		return first;
 
 	value_t ret;
 
-	if (first.type == INTEGER )
+	if (first.type == valueType_t::INTEGER )
 	{
-		if ( second.type == INTEGER )
+		if ( second.type == valueType_t::INTEGER )
 			ret = first.iValue + second.iValue;
 		else
 			ret = first.toDouble() + second.fValue;
 	}else
 	{
-		if ( second.type == INTEGER )
+		if ( second.type == valueType_t::INTEGER )
 			ret = first.fValue + second.toDouble();
 		else
 			ret = first.fValue + second.fValue;
@@ -36,20 +36,20 @@ value_t operator+(const value_t &first, const value_t &second)
 value_t operator-(const value_t &first, const value_t &second)
 {
 	// TODO: how to sub unknown types?
-	if ( first.type == UNKNOWN || second.type == UNKNOWN )
+	if ( first.type == valueType_t::UNKNOWN || second.type == valueType_t::UNKNOWN )
 		return first;
 
 	value_t ret;
 
-	if (first.type == INTEGER )
+	if (first.type == valueType_t::INTEGER )
 	{
-		if ( second.type == INTEGER )
+		if ( second.type == valueType_t::INTEGER )
 			ret = first.iValue - second.iValue;
 		else
 			ret = first.toDouble() - second.fValue;
 	}else
 	{
-		if ( second.type == INTEGER )
+		if ( second.type == valueType_t::INTEGER )
 			ret = first.fValue - second.toDouble();
 		else
 			ret = first.fValue - second.fValue;
@@ -64,20 +64,20 @@ value_t operator-(const value_t &first, const value_t &second)
 value_t operator*(const value_t &first, const value_t &second)
 {
 	// TODO: how to mul unknown types?
-	if ( first.type == UNKNOWN || second.type == UNKNOWN )
+	if ( first.type == valueType_t::UNKNOWN || second.type == valueType_t::UNKNOWN )
 		return first;
 
 	value_t ret;
 
-	if (first.type == INTEGER )
+	if (first.type == valueType_t::INTEGER )
 	{
-		if ( second.type == INTEGER )
+		if ( second.type == valueType_t::INTEGER )
 			ret = first.iValue * second.iValue;
 		else
 			ret = first.toDouble() * second.fValue;
 	}else
 	{
-		if ( second.type == INTEGER )
+		if ( second.type == valueType_t::INTEGER )
 			ret = first.fValue * second.toDouble();
 		else
 			ret = first.fValue * second.fValue;
@@ -92,20 +92,20 @@ value_t operator*(const value_t &first, const value_t &second)
 value_t operator/(const value_t &first, const value_t &second)
 {
 	// TODO: how to div unknown types?
-	if ( first.type == UNKNOWN || second.type == UNKNOWN )
+	if ( first.type == valueType_t::UNKNOWN || second.type == valueType_t::UNKNOWN )
 		return first;
 
 	value_t ret;
 
-	if (first.type == INTEGER )
+	if (first.type == valueType_t::INTEGER )
 	{
-		if ( second.type == INTEGER )
+		if ( second.type == valueType_t::INTEGER )
 			ret = first.iValue / second.iValue;
 		else
 			ret = first.toDouble() / second.fValue;
 	}else
 	{
-		if ( second.type == INTEGER )
+		if ( second.type == valueType_t::INTEGER )
 			ret = first.fValue / second.toDouble();
 		else
 			ret = first.fValue / second.fValue;

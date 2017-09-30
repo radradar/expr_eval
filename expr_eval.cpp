@@ -2,14 +2,9 @@
 //
 
 #include "stdafx.h"
-
-#include "parse_exception.h"
-#include "evaluation_exception.h"
-
-#include "shunting-yard.h"
+#include <iomanip>
 
 #include "expression.h"
-#include "string_helpers.h"
 
 
 //std::string expr = "";
@@ -74,29 +69,21 @@ int _tmain(/*int argc, _TCHAR* argv[]*/)
 	{
 		auto inputString = get_user_input();
 
-		//
-		// handle input
-		//
-		// trim white chars
-		inputString = trim( inputString );
-		// to lower
-		std::transform( inputString.begin(), inputString.end(), inputString.begin(), ::tolower );
-		
-
 		expressionEval::Expression expression;
-		expressionEval::status_t operationStatus;
+		expressionEval::Status operationStatus;
 		auto answer = expression.evaluate( inputString, operationStatus );
 
-		// TODO: nie podoba mi sie rozbicie teog na wypisanie wartosci a obsluga bledu wewnatrz expression!!!!
-		if ( operationStatus.getFlag() == expressionEval::EOK )
+		// check evaluation status
+		if ( operationStatus.getFlag() == expressionEval::ecode_t::EOK )
 		{
-			if (answer.type == expressionEval::INTEGER )
+			if (answer.type == expressionEval::valueType_t::INTEGER )
 			{
 				std::cout << answer.iValue << std::endl;
 				//std::cout << "Answer *** " << answer.iValue << " *** " << std::endl;
 			}
-			else if(answer.type == expressionEval::FLOATINGPOINT)
+			else if(answer.type == expressionEval::valueType_t::FLOATINGPOINT)
 			{
+				std::cout << std::fixed;
 				std::cout << answer.fValue << std::endl;
 				//std::cout << "Answer *** " << answer.fValue << " *** " << std::endl;
 			}
