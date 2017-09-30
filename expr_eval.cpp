@@ -1,8 +1,6 @@
-// expr_eval.cpp : Defines the entry point for the console application.
-//
-
 #include "stdafx.h"
-#include <iomanip>
+
+#include <iomanip> // std::fixed etc.
 
 #include "expression.h"
 
@@ -58,13 +56,14 @@ std::string get_user_input()
 int _tmain(/*int argc, _TCHAR* argv[]*/)
 {
 	// TODO:
-	// - non-alphanumerics?
 	// - on win32 register SetConsoleCtrlHandler & add break to main loop
 	// - on unix add signal handler & add break to main loop
 
 	auto retValue = EXIT_SUCCESS;
 
+	//
 	// main loop
+	//
 	while( true )
 	{
 		auto inputString = get_user_input();
@@ -93,12 +92,10 @@ int _tmain(/*int argc, _TCHAR* argv[]*/)
 			// send empty line to std output
 			std::cout << std::endl;
 			// send error message to err output 
-			//cerr << "BRAK PRAWIDLOWEJ ODPOWIEDZI " << endl;
 			retValue = EXIT_FAILURE;
 		}
 	} // main loop
 
-	
 	return retValue;
 }
 

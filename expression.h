@@ -163,12 +163,12 @@ private:
 	void prepare_for_evaluation();
 
 	///
-	/// main parse function
+	/// tokens->(stack of operands/operators/function)->final answer
 	///
-	void parse( tokens_t &tokens, operands_t &operands, operators_t &operators, functions_t &functions, Status &operationStatus);
+	void calculate( tokens_t &tokens, operands_t &operands, operators_t &operators, functions_t &functions, Status &operationStatus);
 
 	///
-	/// error findig helper
+	/// error pointing helper
 	///
 	size_t get_last_eval_position() const { return m_lastParsedTokenPosition; }
 

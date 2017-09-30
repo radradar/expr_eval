@@ -18,7 +18,7 @@
 TEST (ExpressionEvaluateTestOperators, Sum )
 {
 	// INTEGERS
-	expressionEval::status_t operationStatus;
+	expressionEval::Status operationStatus;
 	expressionEval::Expression expression;
 	//TEST_CASE_EQ( 3+2);
 	//TEST_CASE_EQ( -3+2);
@@ -41,7 +41,7 @@ TEST (ExpressionEvaluateTestOperators, Sum )
 
 TEST (ExpressionEvaluateTestOperators, Sub )
 {
-	expressionEval::status_t operationStatus;
+	expressionEval::Status operationStatus;
 	expressionEval::Expression expression;
 	TEST_CASE_EQ( 2-3 );
 	TEST_CASE_EQ( 3-2 );
@@ -54,7 +54,7 @@ TEST (ExpressionEvaluateTestOperators, Sub )
 
 TEST (ExpressionEvaluateTestOperators, Mul )
 {
-	expressionEval::status_t operationStatus;
+	expressionEval::Status operationStatus;
 	expressionEval::Expression expression;
 	TEST_CASE_EQ( 2*3 );
 	TEST_CASE_EQ( 3*2 );
@@ -65,7 +65,7 @@ TEST (ExpressionEvaluateTestOperators, Mul )
 
 TEST (ExpressionEvaluateTestOperators, Div )
 {
-	expressionEval::status_t operationStatus;
+	expressionEval::Status operationStatus;
 	expressionEval::Expression expression;
 	TEST_CASE_EQ( 2/3 );
 	TEST_CASE_EQ( 3/2 );
@@ -76,7 +76,7 @@ TEST (ExpressionEvaluateTestOperators, Div )
 
 TEST (ExpressionEvaluateTestOperators, Modulo )
 {
-	expressionEval::status_t operationStatus;
+	expressionEval::Status operationStatus;
 	expressionEval::Expression expression;
 	TEST_CASE_EQ( 2%3 );
 	TEST_CASE_EQ( 3%2 );
@@ -95,7 +95,7 @@ TEST (ExpressionEvaluateTestOperators, Modulo )
 
 TEST (ExpressionEvaluateTestOperators, Power )
 {
-	expressionEval::status_t operationStatus;
+	expressionEval::Status operationStatus;
 	expressionEval::Expression expression;
 
 	EXPECT_EQ( (int64_t)pow(2,3), expression.evaluate("2^3", operationStatus) );
@@ -112,7 +112,7 @@ TEST (ExpressionEvaluateTestOperators, Power )
 
 TEST (ExpressionEvaluateTestOperators, OperatorPrecedence )
 {
-	expressionEval::status_t operationStatus;
+	expressionEval::Status operationStatus;
 	expressionEval::Expression expression;
 
 	TEST_CASE_DOUBLE_EQ(2+3*4);
@@ -137,7 +137,7 @@ TEST (ExpressionEvaluateTestOperators, OperatorPrecedence )
 
 TEST (ExpressionEvaluateTestFunctions, Functions )
 {
-	expressionEval::status_t operationStatus;
+	expressionEval::Status operationStatus;
 	expressionEval::Expression expression;
 
 	TEST_CASE_DOUBLE_EQ( sin(0.0) );
@@ -171,7 +171,7 @@ TEST (ExpressionEvaluateTestFunctions, Functions )
 
 TEST (ExpressionEvaluateTestFunctions, FunctionsAndOperators )
 {
-	expressionEval::status_t operationStatus;
+	expressionEval::Status operationStatus;
 	expressionEval::Expression expression;
 
 	TEST_CASE_DOUBLE_EQ( sin(1.0)*sin(0.0));
@@ -186,7 +186,7 @@ TEST (ExpressionEvaluateTestFunctions, FunctionsAndOperators )
 
 TEST (ExpressionEvaluateTestFunctions, FunctionsAndArgumentEvaluation )
 {
-	expressionEval::status_t operationStatus;
+	expressionEval::Status operationStatus;
 	expressionEval::Expression expression;
 
 	TEST_CASE_DOUBLE_EQ( sin(1.0+2.0)*sin(0.0-1.0));
@@ -201,23 +201,57 @@ TEST (ExpressionEvaluateTestFunctions, FunctionsAndArgumentEvaluation )
 
 #pragma endregion
 
-TEST (ExpressionEvaluateTestInvalidExpression, InvalidExpressions )
+TEST (ExpressionEvaluateTestInvalidExpression, Numbers )
 {
-	expressionEval::status_t operationStatus;
+	expressionEval::Status operationStatus;
 	expressionEval::Expression expression;
 
-	//ASSERT_NO_THROW( expression.evaluate( "" ,operationStatus) );
-	//ASSERT_NO_THROW( expression.evaluate( "x" ,operationStatus) );
-	//ASSERT_NO_THROW( expression.evaluate( "xXx" ,operationStatus) );
-	//ASSERT_NO_THROW( expression.evaluate( "(" ,operationStatus) );
-	//ASSERT_NO_THROW( expression.evaluate( ")" ,operationStatus) );
-	//ASSERT_NO_THROW( expression.evaluate( "-" ,operationStatus) );
-	//ASSERT_NO_THROW( expression.evaluate( "+" ,operationStatus) );
-	//ASSERT_NO_THROW( expression.evaluate( "*" ,operationStatus) );
-	//ASSERT_NO_THROW( expression.evaluate( "/" ,operationStatus) );
-	//ASSERT_NO_THROW( expression.evaluate( "-" ,operationStatus) );
-	//ASSERT_NO_THROW( expression.evaluate( "+" ,operationStatus) );
+	ASSERT_NO_THROW( expression.evaluate( "" ,operationStatus) );
+	ASSERT_NO_THROW( expression.evaluate( "2..0" ,operationStatus) );
+	ASSERT_NO_THROW( expression.evaluate( "--2.0" ,operationStatus) );
+	ASSERT_NO_THROW( expression.evaluate( "++2.0" ,operationStatus) );
+	ASSERT_NO_THROW( expression.evaluate( "+2+2." ,operationStatus) );
+	ASSERT_NO_THROW( expression.evaluate( "2.0f" ,operationStatus) );
+	ASSERT_NO_THROW( expression.evaluate( "9223372036854775807" ,operationStatus) );
 
+
+	//EXPECT_NEQ( operationStatus.flag
+}
+
+TEST (ExpressionEvaluateTestInvalidExpression, Operators )
+{
+	expressionEval::Status operationStatus;
+	expressionEval::Expression expression;
+
+	ASSERT_NO_THROW( expression.evaluate( "" ,operationStatus) );
+	ASSERT_NO_THROW( expression.evaluate( "(" ,operationStatus) );
+	ASSERT_NO_THROW( expression.evaluate( ")" ,operationStatus) );
+	ASSERT_NO_THROW( expression.evaluate( "-" ,operationStatus) );
+	ASSERT_NO_THROW( expression.evaluate( "+" ,operationStatus) );
+	ASSERT_NO_THROW( expression.evaluate( "*" ,operationStatus) );
+	ASSERT_NO_THROW( expression.evaluate( "/" ,operationStatus) );
+	ASSERT_NO_THROW( expression.evaluate( "-" ,operationStatus) );
+	ASSERT_NO_THROW( expression.evaluate( "+" ,operationStatus) );
+
+
+	//EXPECT_NEQ( operationStatus.flag
+}
+
+TEST (ExpressionEvaluateTestInvalidExpression, Functions )
+{
+	expressionEval::Status operationStatus;
+	expressionEval::Expression expression;
+
+	ASSERT_NO_THROW( expression.evaluate( "" ,operationStatus) );
+	ASSERT_NO_THROW( expression.evaluate( "x" ,operationStatus) );
+	ASSERT_NO_THROW( expression.evaluate( "xXx" ,operationStatus) );
+	ASSERT_NO_THROW( expression.evaluate( "sin(sin(sin()))" ,operationStatus) );
+	ASSERT_NO_THROW( expression.evaluate( "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz" ,operationStatus) );
+
+	ASSERT_NO_THROW( expression.evaluate( "sin(0.0" ,operationStatus) );
+	ASSERT_NO_THROW( expression.evaluate( "cos(0.0" ,operationStatus) );
+	ASSERT_NO_THROW( expression.evaluate( "floor0.0)" ,operationStatus) );
+	ASSERT_NO_THROW( expression.evaluate( "ceil(0).0" ,operationStatus) );
 
 	//EXPECT_NEQ( operationStatus.flag
 }

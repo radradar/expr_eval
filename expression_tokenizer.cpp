@@ -52,7 +52,7 @@ std::string ExpressionTokenizer::prepare_expression( const std::string& expressi
 
 /**************************************************************************************
 *
-* cuts string into tokens and returns an deque
+* cuts string into tokens and returns an deque of tokens
 * @returns:
 *	deque of token_t
 * @throws:
@@ -85,6 +85,11 @@ tokens_t ExpressionTokenizer::get_tokens( const std::string& expression, Status 
 		{
 			token.type = tokenType_t::ETOKEN_NUMBER;
 			token.value = get_number( it, m_expression.end(), operationStatus );
+			if ( operationStatus.getFlag() != ecode_t::EOK )
+			{ // somthing went wrong when reading number
+				operationStatus.setPosition( std::distance( m_expression.begin(), it ) + token.value.length() );
+				break;			
+			}
 		}
 		// is it operator?
 		else if ( sOperators.find(*it) != std::string::npos )
@@ -127,8 +132,7 @@ tokens_t ExpressionTokenizer::get_tokens( const std::string& expression, Status 
 		{
 			if ( token.type == tokenType_t::ETOKEN_UNKNOWN )
 			{ // failure, set reason flag & position
-				operationStatus.setFlag(ecode_t::EPARSING_FAILED_UNKNOWN_OPERATOR);
-				operationStatus.setPosition( std::distance( m_expression.begin(), it ) );
+				operationStatus.set(ecode_t::EPARSING_FAILED_UNKNOWN_OPERATOR, std::distance( m_expression.begin(), it ));
 				break;
 			}
 
@@ -173,7 +177,7 @@ std::string ExpressionTokenizer::get_number( istring_t it, istring_t end, Status
 
 	if ( valueString.find_first_of('.') != valueString.find_last_of('.'))
 	{ // two or more dots?
-		operationStatus.setFlag(ecode_t::EFAIL);
+		operationStatus.setFlag(ecode_t::EPARSING_FAILED_NUMBER_READ);
 	}
 
 #ifdef _DEBUG_MSG_

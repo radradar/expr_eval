@@ -14,14 +14,14 @@ namespace expressionEval
 	{
 	public:
 
-		explicit parse_exception(const char* message/*, const Status &operationStatus*/):
-		msg_(message)/*, 
-		stat_(operationStatus)*/
+		explicit parse_exception(const char* message, const Status &operationStatus):
+		msg_(message), 
+		stat_(operationStatus)
 		{}
 
-		explicit parse_exception(const std::string& message/*, const Status &operationStatus*/):
-		msg_(message)/*, 
-		stat_(operationStatus)*/
+		explicit parse_exception(const std::string& message, const Status &operationStatus):
+		msg_(message), 
+		stat_(operationStatus)
 		{}
 
 		virtual ~parse_exception() throw ()
@@ -32,14 +32,14 @@ namespace expressionEval
 			return msg_.c_str();
 		}
 
-		//Status getPosition() const throw()
-		//{
-		//	return stat_;
-		//}
+		const Status& getStatus() const throw()
+		{
+			return stat_;
+		}
 
 	protected:
 		std::string msg_;
-		//Status	stat_;
+		Status		stat_;
 	};
 
 } //namespace expressionEval

@@ -2,7 +2,7 @@
 
 
 // TODO
-// - wrong position of error when misspelling function name
+
 
 namespace expressionEval
 {
@@ -79,8 +79,6 @@ int Expression::push_number(const std::string &valueString,
 							operands_t &operands) 
 {
 	size_t idx;
-	//double fValue = 0.0f;
-	//int64_t iValue = 0L;
 	value_t value;
 
 	// TODO 
@@ -88,17 +86,39 @@ int Expression::push_number(const std::string &valueString,
 
 	if ( valueString.find_first_of('.') != std::string::npos )
 	{ // floating point
-		value.fValue = stod( valueString, &idx );
-		if ( idx != valueString.length() )
-			throw( evaluation_exception("value conversion -> integer failure " ));
-		value.type = valueType_t::FLOATINGPOINT;
+		try
+		{
+			value.fValue = stod( valueString, &idx );
+			if ( idx != valueString.length() )
+				throw( evaluation_exception("value conversion string -> double failure ", Status(ecode_t::EEVALUATION_CONVERSION_FAILURE) ));
+			value.type = valueType_t::FLOATINGPOINT;
+		}
+		catch( const std::invalid_argument & )
+		{
+			throw ( evaluation_exception("invalid argument string->double)", Status(ecode_t::EEVALUATION_CONVERSION_FAILURE ))); 
+		}
+		catch( const std::out_of_range & )
+		{
+			throw ( evaluation_exception("invalid argument string->double)", Status(ecode_t::EEVALUATION_CONVERSION_FAILURE ))); 
+		}	
 	}
 	else
 	{ // integer
-		value.iValue = stol( valueString, &idx );
-		if ( idx != valueString.length() )
-			throw( evaluation_exception("value conversion -> floating point failure " ));
-		value.type = valueType_t::INTEGER;
+		try
+		{
+			value.iValue = stol( valueString, &idx );
+			if ( idx != valueString.length() )
+				throw( evaluation_exception("value conversion string -> integer point failure ",Status(ecode_t::EEVALUATION_CONVERSION_FAILURE) ));
+			value.type = valueType_t::INTEGER;
+		}
+		catch( const std::invalid_argument & )
+		{
+			throw ( evaluation_exception("invalid argument string->integer)", Status(ecode_t::EEVALUATION_CONVERSION_FAILURE ))); 
+		}
+		catch( const std::out_of_range & )
+		{
+			throw ( evaluation_exception("invalid argument string->integer)", Status(ecode_t::EEVALUATION_CONVERSION_FAILURE ))); 
+		}
 	}
 
 	operands.push( value );
@@ -117,7 +137,7 @@ int Expression::apply_unary_operator(const operator_t *oper,
 									 operands_t &operands) 
 {
 	if ( !operands.size() )
-		throw( evaluation_exception("operand missing"));
+		throw( evaluation_exception("operands missing", Status( ecode_t::EEVALUATION_FAILED_NO_OPERANDS)));
 
 	value_t x = operands.top();
 	operands.pop();
@@ -132,11 +152,11 @@ int Expression::apply_unary_operator(const operator_t *oper,
 		else if ( x.type == valueType_t::FLOATINGPOINT )
 			x.fValue = -x.fValue;
 		else
-			throw( evaluation_exception("operation on unknown value"));
+			throw( evaluation_exception("operation on value of a unknown type ", Status(ecode_t::EEVALUATION_CONVERSION_FAILURE)));
 		break;
 
 	default:
-		throw( evaluation_exception("unrecognized unary operator"));
+		throw( evaluation_exception("unrecognized unary operator", Status(ecode_t::EEVALUATION_FAILED_UNKNOW_OPERATOR)));
 	}
 	operands.push(x);
 	return static_cast<int>(ecode_t::EOK);
@@ -155,13 +175,13 @@ int Expression::apply_binary_operator(const operator_t *oper,
 									  operands_t &operands) 
 {
 	if (!operands.size())
-		throw ( evaluation_exception("1st operand's missing"));
+		throw ( evaluation_exception("1st operand's missing", Status( ecode_t::EEVALUATION_FAILED_NO_OPERANDS)));
 
 	value_t y = operands.top();
 	operands.pop();
 
 	if (!operands.size())
-		throw ( evaluation_exception("2nd operand's missing"));
+		throw ( evaluation_exception("2nd operand's missing", Status( ecode_t::EEVALUATION_FAILED_NO_OPERANDS)));
 
 	value_t x = operands.top();
 	operands.pop();
@@ -182,12 +202,12 @@ int Expression::apply_binary_operator(const operator_t *oper,
 			if ( y.type == valueType_t::INTEGER )
 			{
 				if ( y.iValue == 0L )
-					throw( evaluation_exception("divide by 0 (integer)"));
+					throw( evaluation_exception("divide by 0 (integer)", Status(ecode_t::EEVALUATION_FAILED_ARGUMENT_ERROR)));
 			}else
 				if ( y.type == valueType_t::FLOATINGPOINT )
 				{
 					if (y.fValue == 0.0f )
-						throw( evaluation_exception("divide by 0.0 (float)"));
+						throw( evaluation_exception("divide by 0.0 (float)", Status(ecode_t::EEVALUATION_FAILED_ARGUMENT_ERROR)));
 				}
 		x = x / y;
 		}
@@ -195,7 +215,7 @@ int Expression::apply_binary_operator(const operator_t *oper,
 	case '%': // modulo
 		{
 			if ( (long)y.toInteger() == 0L )
-				throw( evaluation_exception("fmod argument equals to 0", y.toDouble()));
+				throw( evaluation_exception("fmod argument equals to 0", Status(ecode_t::EEVALUATION_FAILED_ARGUMENT_ERROR)));
 			x = fmod(x.toInteger(), y.toInteger());
 		}
 		break;
@@ -208,7 +228,8 @@ int Expression::apply_binary_operator(const operator_t *oper,
 		}
 		break;
 	default:
-		throw( evaluation_exception("unrecognized operator"));
+		throw( evaluation_exception("unrecognized operator", Status(ecode_t::EEVALUATION_FAILED_UNKNOW_OPERATOR)));
+		break;
 	}
 
 	operands.push(x);
@@ -228,10 +249,10 @@ int Expression::apply_operator(const operator_t *oper,
 							   operands_t &operands) 
 {
 	if ( !oper )
-		throw( evaluation_exception("operator is missing!"));
+		throw( evaluation_exception("operator is missing!", Status(ecode_t::EEVALUATION_FAILED_NO_OPERATORS)));
 
 	if ( !operands.size())
-		throw( evaluation_exception("operands is missing!"));
+		throw( evaluation_exception("operands is missing!", Status(ecode_t::EEVALUATION_FAILED_NO_OPERANDS)));
 
 	if (oper->arity == operatorType_t::EOPERATOR_UNARY)
 		return apply_unary_operator(oper, operands);
@@ -252,7 +273,7 @@ int Expression::apply_function(const std::string &function,
 							   operands_t &operands) 
 {
 	if (!operands.size())
-		throw( evaluation_exception("No functions arguments", 0));
+		throw( evaluation_exception("No functions arguments", Status(ecode_t::EEVALUATION_FAILED_ARGUMENT_ERROR)));
 
 	value_t x = operands.top();
 	operands.pop();
@@ -269,7 +290,7 @@ int Expression::apply_function(const std::string &function,
 	}
 	else
 	{
-		throw( evaluation_exception("undefined function"));
+		throw( evaluation_exception("undefined function", Status(ecode_t::EEVALUATION_FAILED_UNKNOW_FUNCTION)));
 	}
 
 	operands.push(x);
@@ -290,7 +311,7 @@ int Expression::push_operator(const operator_t *oper,
 							  operators_t &operators) 
 {
 	if (!oper)
-		throw( evaluation_exception("operator missing"));
+		throw( evaluation_exception("operator missing", Status(ecode_t::EEVALUATION_FAILED_NO_OPERATORS)));
 
 	int Status = 0;
 	while (operators.size() && Status == 0) 
@@ -318,7 +339,7 @@ int Expression::push_operator(const operator_t *oper,
 * @throws:
 *	evaluation_exception
 ***************************************************************************************/
-void Expression::parse( tokens_t & tokens, 
+void Expression::calculate( tokens_t & tokens, 
 					   operands_t &operands, 
 					   operators_t &operators, 
 					   functions_t &functions, 
@@ -326,14 +347,15 @@ void Expression::parse( tokens_t & tokens,
 {
 	if ( !tokens.size() )
 	{
-		operationStatus.setFlag( ecode_t::EPARSING_FAILED_NO_TOKENS);
-		throw evaluation_exception("no tokens available");
+		operationStatus.setFlag( ecode_t::EEVALUATION_FAILED_NO_TOKENS);
+		throw evaluation_exception("no tokens available", operationStatus);
 	}
 
 	auto token = tokens.front();
 
 	token_t previous = ExpressionTokenizer::SENTINEL;
 
+	// for all tokens
 	while( token.type != tokenType_t::ETOKEN_UNKNOWN)
 	{
 		m_lastParsedTokenPosition = token.position;
@@ -345,9 +367,8 @@ void Expression::parse( tokens_t & tokens,
 				previous.type == tokenType_t::ETOKEN_FUNCTION ||
 				previous.type == tokenType_t::ETOKEN_RIGHT_BRACKET )
 			{
-				operationStatus.setFlag(ecode_t::EPARSING_FAILED_GENERAL);
-				operationStatus.setPosition(token.position);
-				throw( parse_exception("syntax error - no operator?"));
+				operationStatus.set(ecode_t::EPARSING_FAILED_GENERAL, token.position);
+				throw( evaluation_exception("syntax error - no operator?", operationStatus));
 			}
 			else 
 			{
@@ -375,9 +396,8 @@ void Expression::parse( tokens_t & tokens,
 
 				if (!found_parenthesis)
 				{
-					operationStatus.setFlag(ecode_t::EPARSING_FAILED_NO_CLOSING_PARENTHESIS);
-					operationStatus.setPosition(token.position);
-					throw( parse_exception("No closing parenthesis"));
+					operationStatus.set(ecode_t::EPARSING_FAILED_NO_CLOSING_PARENTHESIS, token.position);
+					throw( evaluation_exception("No closing parenthesis", operationStatus));
 				}
 				else 
 					if (functions.size())
@@ -401,9 +421,8 @@ void Expression::parse( tokens_t & tokens,
 			break;
 
 		default:
-			operationStatus.setFlag(ecode_t::EPARSING_FAILED_NO_CLOSING_PARENTHESIS);
-			operationStatus.setPosition(token.position);
-			throw( parse_exception("Unknown token"));
+			operationStatus.set(ecode_t::EPARSING_FAILED_NO_CLOSING_PARENTHESIS, token.position);
+			throw( evaluation_exception("Unknown token", operationStatus));
 			break;
 
 		}
@@ -425,9 +444,8 @@ void Expression::parse( tokens_t & tokens,
 		operators.pop();
 		if (oper.oper == '(')
 		{
-			operationStatus.setFlag( ecode_t::EFAIL );
-			operationStatus.setPosition( token.position );
-			throw( parse_exception("No closing parenthesis"));
+			operationStatus.set( ecode_t::EFAIL ,token.position);
+			throw( evaluation_exception("No closing parenthesis", operationStatus));
 		}
 		else
 		{
@@ -491,7 +509,7 @@ value_t Expression::evaluate( const std::string& expression, Status &operationSt
 		try
 		{
 			// parser tokens -> 
-			parse( m_tokens, m_operands, m_operators, m_functions, operationStatus );
+			calculate( m_tokens, m_operands, m_operators, m_functions, operationStatus );
 
 			// TODO 
 			// - update answer to nan?
@@ -515,25 +533,25 @@ value_t Expression::evaluate( const std::string& expression, Status &operationSt
 				if ( m_operands.size() != 1 )
 				{
 					operationStatus.setFlag( ecode_t::EEVALUATION_FAILED_OPERANDS_NOT_CONSUMED );
-					std::cerr << "Parsing error: " << " operand(s) left on stack" << std::endl;
+					std::cerr << "Evaluation error: " << " operand(s) left on stack" << std::endl;
 				}
 				else
 					if ( m_tokens.size() != 1 ) /*unknown left*/
 					{
 						operationStatus.setFlag( ecode_t::EEVALUATION_FAILED_TOKENS_NOT_CONSUMED );
-						std::cerr << "Parsing error: " << " token(s) left on stack" << std::endl;
+						std::cerr << "Evaluation error: " << " token(s) left on stack" << std::endl;
 					}
 					else
 						if ( m_operators.size() )
 						{
 							operationStatus.setFlag( ecode_t::EEVALUATION_FAILED_OPERATORS_NOT_CONSUMED );
-							std::cerr << "Parsing error: " << " operator(s) left on stack" << std::endl;
+							std::cerr << "Evaluation error: " << " operator(s) left on stack" << std::endl;
 						}
 						else
 							if ( m_functions.size() )
 							{
 								operationStatus.setFlag( ecode_t::EEVALUATION_FAILED_FUNCTION_NOT_CONSUMED );
-								std::cerr << "Parsing error: " << " function(s) left on stack" << std::endl;
+								std::cerr << "Evaluation error: " << " function(s) left on stack" << std::endl;
 							}
 			}	
 		}
@@ -541,14 +559,8 @@ value_t Expression::evaluate( const std::string& expression, Status &operationSt
 		{
 			operationStatus.setFlag(ecode_t::EEVALUATION_FAILED_GENERAL);
 			std::cerr << "Evaluation error: " << e.what() << ", near position = " << get_last_eval_position() << std::endl;
-			//std::cout << std::string(operationStatus.getPosition(), ' ') << "^" << std::endl;
 		}
-		//catch( const std::exception &e )
-		//{
-		//	operationStatus.setFlag(EEVALUATION_FAILED_GENERAL);
-		//	std::cerr << "Evaluation error: " << e.what() << ", near position = " << get_last_eval_position() << std::endl;
-		//	//std::cout << std::string(get_last_eval_position(), ' ') << "^" << std::endl;			
-		//}
+
 
 #ifdef _DEBUG_MSG_
 		std::cout << "stack tokens: " << m_tokens.size() << std::endl;
