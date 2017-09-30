@@ -17,15 +17,15 @@ const availableFunctions Expression::m_availableFunction;
 // all operators
 /*const*/ operator_t expressionEval::Expression::OPERATORS[] = 
 {
-	{'^', 1, operatorType_t::EOPERATOR_BINARY, operatorAssociativity_t::EOPERATOR_RIGHT},
-	{'+', 2, operatorType_t::EOPERATOR_UNARY,  operatorAssociativity_t::EOPERATOR_RIGHT},// znak przd wartoscia
-	{'-', 2, operatorType_t::EOPERATOR_UNARY,  operatorAssociativity_t::EOPERATOR_RIGHT}, // znak przed wartoscia
-	{'*', 3, operatorType_t::EOPERATOR_BINARY, operatorAssociativity_t::EOPERATOR_LEFT},
-	{'/', 3, operatorType_t::EOPERATOR_BINARY, operatorAssociativity_t::EOPERATOR_LEFT},
-	{'%', 3, operatorType_t::EOPERATOR_BINARY, operatorAssociativity_t::EOPERATOR_LEFT},
-	{'+', 4, operatorType_t::EOPERATOR_BINARY, operatorAssociativity_t::EOPERATOR_LEFT},
-	{'-', 4, operatorType_t::EOPERATOR_BINARY, operatorAssociativity_t::EOPERATOR_LEFT},
-	{'(', 5, operatorType_t::EOPERATOR_OTHER,  operatorAssociativity_t::EOPERATOR_NONE},
+	{'^', "OP_POW",		1, operatorType_t::EOPERATOR_BINARY, operatorAssociativity_t::EOPERATOR_RIGHT},
+	{'+', "OP_PLUS",	2, operatorType_t::EOPERATOR_UNARY,  operatorAssociativity_t::EOPERATOR_RIGHT},// znak przd wartoscia
+	{'-', "OP_MINUS",	2, operatorType_t::EOPERATOR_UNARY,  operatorAssociativity_t::EOPERATOR_RIGHT}, // znak przed wartoscia
+	{'*', "OP_MUL",		3, operatorType_t::EOPERATOR_BINARY, operatorAssociativity_t::EOPERATOR_LEFT},
+	{'/', "OP_DIV",		3, operatorType_t::EOPERATOR_BINARY, operatorAssociativity_t::EOPERATOR_LEFT},
+	{'%', "OP_MOD",		3, operatorType_t::EOPERATOR_BINARY, operatorAssociativity_t::EOPERATOR_LEFT},
+	{'+', "OP_ADD",		4, operatorType_t::EOPERATOR_BINARY, operatorAssociativity_t::EOPERATOR_LEFT},
+	{'-', "OP_SUB",		4, operatorType_t::EOPERATOR_BINARY, operatorAssociativity_t::EOPERATOR_LEFT},
+	{'(', "", 5, operatorType_t::EOPERATOR_OTHER,  operatorAssociativity_t::EOPERATOR_NONE},
 	//{'[', 5, tokenType_t::operatorType_t::EOPERATOR_OTHER,  operatorAssociativity_t::EOPERATOR_NONE},
 	//{'{', 5, tokenType_t::operatorType_t::EOPERATOR_OTHER,  operatorAssociativity_t::EOPERATOR_NONE}
 };
@@ -582,6 +582,16 @@ value_t Expression::evaluate( const std::string& expression, Status &operationSt
 /**************************************************************************************
 *
 * load data from precedence.cfg file and updates OPERATORS array with new precedences
+* precedence.cfg format decr:
+*
+* operator_name=precedence_value
+*
+* for example
+* OP_ADD=1
+* OP_SUB=2
+*
+* max precedence value 99
+*
 * @returns:
 *	number of successed applied changes
 * @throws:
@@ -589,6 +599,9 @@ value_t Expression::evaluate( const std::string& expression, Status &operationSt
 ***************************************************************************************/
 size_t Expression::update_operator_precedence()
 {
+	// TODO:
+	// - move configuration to common known format -> xml/json/ini
+
 	std::ifstream ifs("precedence.cfg");
 	size_t success=0;
 	if ( ifs.is_open())
@@ -598,7 +611,9 @@ size_t Expression::update_operator_precedence()
 			std::string line;
 			std::getline(ifs, line );
 
-			std::regex base_regex("^([^+-*\\/%]){1}=(\\d{1,2}){1}$"); // regex for symbol =  number (max 2 digits)
+			//std::regex base_regex("^([^+-*\\/%]){1}=(\\d{1,2}){1}$"); // regex for 'symbol =  number (max 2 digits)'
+			std::regex base_regex("^(OP_.{1,12})=(\\d{1,2}){1}$"); // regex = starts OP_(1_up_to_12_characeters)=ends_with(1 or 2 digits)
+
 			std::smatch base_match;
 
 			if (std::regex_match(line, base_match, base_regex)) 
@@ -608,16 +623,18 @@ size_t Expression::update_operator_precedence()
 				{
 					std::ssub_match base_sub_match1 = base_match[1];
 					std::ssub_match base_sub_match2 = base_match[2];
-					char symbol = base_sub_match1.str().at(0);
-					int precedence = stoi(base_sub_match2.str(), NULL);
+					auto oper_name = base_sub_match1.str();
+					//char symbol = base_sub_match1.str().at(0);
+					auto precedence = stoi(base_sub_match2.str(), NULL);
 					//std::string base1 = base_sub_match1.str();
 					//std::string base2 = base_sub_match2.str();
 					//std::cout << symbol << " = " << precedence << '\n';
-
+					//std::cout << oper_name << " = " << precedence << '\n';
 					// replace precedence
 					for (size_t i = 0; i < sizeof OPERATORS / sizeof OPERATORS[0]; ++i) 
 					{
-						if ( OPERATORS[i].oper == symbol )
+						//if ( OPERATORS[i].oper == symbol )
+						if ( OPERATORS[i].oper_name == oper_name )
 						{
 							OPERATORS[i].precedence = precedence;
 							++success;

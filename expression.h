@@ -186,7 +186,9 @@ public:
 	/// default c-tor
 	///
 	Expression(): m_tokenizer(""), m_lastParsedTokenPosition(0)
-	{}
+	{
+		update_operator_precedence();
+	}
 
 	///
 	/// d-tor
