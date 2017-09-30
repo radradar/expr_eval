@@ -93,7 +93,7 @@ enum class operatorAssociativity_t
 typedef struct 
 {
 	char					oper;			// opertator symbol/symbols?: +,-,>=, etc  
-	char					*oper_name;		// human name of the operator
+	char const				*oper_name;		// human name of the operator
 	size_t					precedence;		// rank of the operator
 	operatorType_t			arity;			// operator type
 	operatorAssociativity_t	associativity;	// operator assoc
